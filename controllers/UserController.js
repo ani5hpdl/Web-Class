@@ -1,5 +1,6 @@
 const User = require("../models/UserModel.js")
 const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
 
 const getallUser = async (req,res) =>{
     const user = await User.findAll({attributes: {exclude:["password"]}})
@@ -159,8 +160,17 @@ const loginUser = async(req,res) =>{
             })
         }
 
+        const token = jwt.sign(
+            {is:user.id,role : user.role, username : user.username, email: user.email},
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "7d"
+            }
+        )
+
         return res.status(200).json({
-            message : "User Logged In Sucessfully"
+            message : "User Logged In Sucessfully",
+            token
         })
 
     }catch(error){
@@ -172,5 +182,5 @@ const loginUser = async(req,res) =>{
 }
 
 module.exports={
-    addUser,getallUser,getUserById,updateUser,deleteUser
+    addUser,getallUser,getUserById,updateUser,deleteUser,loginUser
 }
